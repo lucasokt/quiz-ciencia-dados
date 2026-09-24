@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ciência dos Dados e Inteligência Empresarial</title>
+  <style>
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 40px 20px;
+      font-family: Arial, sans-serif;
+      background:
+        radial-gradient(circle at 15% 10%, rgba(59,130,246,.12), transparent 30%),
+        radial-gradient(circle at 85% 90%, rgba(139,92,246,.10), transparent 30%),
+        #05070b;
+      color: #f5f5f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .quiz-header {
+      width: min(850px, 100%);
+      padding: 34px 36px;
+      border: 1px solid #202733;
+      border-radius: 18px;
+      background: linear-gradient(145deg, #0d1118, #090c12);
+      box-shadow: 0 15px 50px rgba(0,0,0,.45);
+      position: relative;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .quiz-header::before,
+    .quiz-header::after {
+      content: "";
+      position: absolute;
+      width: 180px;
+      height: 180px;
+      border: 1px solid rgba(80,140,255,.16);
+      transform: rotate(45deg);
+    }
+
+    .quiz-header::before { left: -120px; top: -120px; }
+    .quiz-header::after { right: -120px; bottom: -120px; }
+
+    .tech-line {
+      width: 70px;
+      height: 3px;
+      margin: 0 auto 18px;
+      background: #4f8cff;
+      border-radius: 10px;
+      box-shadow: 0 0 18px rgba(79,140,255,.6);
+    }
+
+    .tag {
+      display: inline-block;
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: #6ea2ff;
+      margin-bottom: 12px;
+    }
+
+    .quiz-header h1 {
+      margin: 0;
+      font-size: clamp(30px, 5vw, 52px);
+      line-height: 1.05;
+      letter-spacing: -1px;
+      color: #fff;
+    }
+
+    .quiz-header p {
+      margin: 14px 0 20px;
+      color: #9aa4b2;
+      font-size: 15px;
+    }
+
+    .topics {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .topics span {
+      border: 1px solid #283241;
+      background: #111722;
+      color: #aeb8c7;
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 10px;
+      letter-spacing: 1.5px;
+    }
+
+    .quiz-container {
+      width: min(650px, 100%);
+      background: #0c1017;
+      border: 1px solid #202733;
+      border-radius: 18px;
+      padding: 28px;
+      box-shadow: 0 15px 50px rgba(0,0,0,.4);
+    }
+
+    #question {
+      margin-bottom: 20px;
+      color: #fff;
+      line-height: 1.4;
+      font-size: 21px;
+    }
+
+    .option {
+      display: block;
+      background: #151b25;
+      border: 1px solid #252e3b;
+      color: #dce2ea;
+      padding: 14px;
+      margin: 9px 0;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: .2s;
+    }
+
+    .option:hover {
+      background: #1b2431;
+      border-color: #3b82f6;
+      transform: translateX(3px);
+    }
+
+    .correct {
+      background: #166534 !important;
+      border-color: #22c55e !important;
+      color: #fff !important;
+    }
+
+    .wrong {
+      background: #991b1b !important;
+      border-color: #ef4444 !important;
+      color: #fff !important;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 12px;
+      width: 100%;
+      border: none;
+      background: linear-gradient(90deg, #2563eb, #4f46e5);
+      color: #fff;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    button:hover {
+      background: linear-gradient(90deg, #1d4ed8, #4338ca);
+    }
+
+    .result {
+      text-align: center;
+      font-size: 18px;
+    }
+
+    @media (max-width: 600px) {
+      body { padding: 20px 12px; }
+      .quiz-header, .quiz-container { padding: 22px; }
+    }
+
+
+    .progress {
+      width: min(650px, 100%);
+      color: #8f9aaa;
+      font-size: 13px;
+      text-align: right;
+      margin-bottom: -12px;
+    }
+
+    .hint-box strong {
+      color: #f0c75e;
+    }
+
+    .feedback {
+      margin-top: 7px;
+      padding: 11px 13px;
+      border-radius: 9px;
+      background: #0e141d;
+      border-left: 3px solid #526174;
+      color: #b9c4d3;
+      font-size: 13px;
+      line-height: 1.5;
+      cursor: default;
+    }
+
+    .feedback-title {
+      display: block;
+      color: #fff;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .option-wrap {
+      margin-bottom: 10px;
+    }
+
+    .option-wrap .option {
+      margin: 0;
+    }
+
+    .selected {
+      outline: 2px solid rgba(255,255,255,.15);
+    }
+
+    #nextButton:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    #nextButton:not(:disabled) {
+      box-shadow: 0 0 18px rgba(79,140,255,.18);
+    }
+
+    .score-mini {
+      margin-top: 10px;
+      color: #8f9aaa;
+      font-size: 13px;
+    }
+
+    @media (max-width: 600px) {
+      .progress { font-size: 12px; }
+      .feedback { font-size: 12.5px; }
+    }
+
+  
+/* Dica escondida: o participante só recebe uma dica se solicitar ao professor/organizador. */
+.hint-box,
+.hint-button,
+.hint,
+button[onclick*="hint"],
+button[onclick*="Hint"] {
+    display: none !important;
+}
+
+</style>
+</head>
+<body>
+
+<header class="quiz-header">
+  <div class="tech-line"></div>
+  <span class="tag">QUIZ ACADÊMICO</span>
+  <h1>CIÊNCIA DOS DADOS<br>E INTELIGÊNCIA EMPRESARIAL</h1>
+  <p>Quiz de Ciência dos Dados e Inteligência Empresarial</p>
+  <div class="topics">
+    <span>CIÊNCIA DOS DADOS</span>
+    <span>INTELIGÊNCIA EMPRESARIAL</span>
+  </div>
+</header>
+
+<div class="progress" id="progress"></div>
+
+<div class="quiz-container">
+  <h2 id="question"></h2>
+  <div id="options"></div>
+  <button id="nextButton" onclick="nextQuestion()" disabled>Próxima questão</button>
+</div>
+
+<script>
+const quiz = [
+  {
+    "pergunta": "No teste de Shapiro-Wilk, uma amostra apresentou p-valor = 0,04, usando 0,05 como referência. Qual interpretação corresponde ao que o professor explicou?",
+    "alternativas": [
+      "Os dados são considerados não normais, pois 0,04 está abaixo de 0,05 e a hipótese nula de normalidade é rejeitada.",
+      "Os dados são considerados normais, pois 0,04 está próximo de 0,05.",
+      "O teste não pode ser interpretado porque o p-valor precisa ser exatamente 0,05.",
+      "Os dados são considerados normais porque valores abaixo de 0,05 confirmam a hipótese nula de normalidade."
+    ],
+    "resposta": 0
+  },
+  {
+    "pergunta": "Seguindo a lógica de intervalo de confiança explicada pelo professor, um p-valor de 0,03 corresponde a qual nível de confiança?",
+    "alternativas": [
+      "93%",
+      "95%",
+      "97%",
+      "99%"
+    ],
+    "resposta": 2
+  },
+  {
+    "pergunta": "Em um gráfico de dispersão, X aumenta enquanto Y tende a diminuir. Como essa relação deve ser classificada?",
+    "alternativas": [
+      "Positiva, porque existe uma tendência entre as variáveis.",
+      "Negativa, porque X e Y variam em sentidos opostos.",
+      "Nula, porque uma variável diminuir impede qualquer correlação.",
+      "Positiva forte, porque a queda de Y acompanha o aumento de X."
+    ],
+    "resposta": 1
+  },
+  {
+    "pergunta": "Dois gráficos apresentam tendência positiva. No gráfico A, os pontos ficam mais próximos de uma tendência crescente; no B, ficam mais espalhados. Qual leitura é compatível com a explicação do professor?",
+    "alternativas": [
+      "B tende a representar uma correlação mais fraca, porque há maior dispersão em torno da tendência.",
+      "B tende a representar uma correlação mais forte, porque maior dispersão indica maior associação.",
+      "A e B necessariamente têm a mesma força, porque ambas são positivas.",
+      "A não possui correlação, porque uma correlação forte só pode ser negativa."
+    ],
+    "resposta": 0
+  },
+  {
+    "pergunta": "Qual afirmação reproduz corretamente a relação entre KPI e métrica destacada pelo professor?",
+    "alternativas": [
+      "Toda KPI é uma métrica, mas nem toda métrica é uma KPI.",
+      "Toda métrica é uma KPI, mas algumas KPIs deixam de ser métricas.",
+      "KPI e métrica são conceitos que não podem aparecer juntos no mesmo dashboard.",
+      "Uma métrica só pode ser KPI quando representa o maior valor numérico do sistema."
+    ],
+    "resposta": 0
+  },
+  {
+    "pergunta": "Segundo a orientação dada sobre dashboards, onde devem ficar preferencialmente os elementos de maior importância?",
+    "alternativas": [
+      "No canto inferior direito, porque é o ponto final da leitura.",
+      "No centro, independentemente da hierarquia das informações.",
+      "Na região superior esquerda, acompanhando o padrão natural de leitura ocidental.",
+      "Em posições aleatórias, para evitar que o usuário priorize uma informação."
+    ],
+    "resposta": 2
+  },
+  {
+    "pergunta": "Por que, segundo as anotações da aula, não é uma boa prática usar gráfico de pizza para representar muitas informações?",
+    "alternativas": [
+      "Porque a comparação entre muitas fatias pode dificultar uma boa visualização dos valores.",
+      "Porque gráficos de pizza só podem representar dados qualitativos.",
+      "Porque gráficos de pizza não permitem representar proporções.",
+      "Porque qualquer gráfico de pizza impede completamente a identificação de categorias."
+    ],
+    "resposta": 0
+  },
+  {
+    "pergunta": "Ao desenhar uma curva normal e justificar por que ela é normal, qual conjunto de características é mais compatível com o material da aula?",
+    "alternativas": [
+      "Formato aproximadamente simétrico, concentração maior na região central e redução em direção às extremidades.",
+      "Formato necessariamente assimétrico, com concentração maior em apenas uma extremidade.",
+      "Valores distribuídos igualmente por toda a escala, sem concentração central.",
+      "Dois ou mais picos obrigatórios, pois uma normal precisa ter várias concentrações."
+    ],
+    "resposta": 0
+  },
+  {
+    "pergunta": "Nas anotações sobre comparação de curvas, foi registrada uma semelhança e uma diferença entre as curvas observadas. Qual alternativa corresponde a esse registro?",
+    "alternativas": [
+      "A semelhança é que as curvas foram tratadas como normais; a diferença observada estava relacionada à forma da distribuição e à concentração dos dados.",
+      "A semelhança é que todas são assimétricas; a diferença é apenas a cor usada no gráfico.",
+      "A semelhança é que todas têm dois picos; a diferença é somente o tamanho do eixo X.",
+      "A semelhança é que todas possuem os mesmos valores; a diferença é somente a escala do eixo Y."
+    ],
+    "resposta": 0
+  },
+  {
+    "pergunta": "Nas anotações da aula, a curtose foi registrada como uma métrica relacionada à forma e à concentração da distribuição. Qual alternativa corresponde ao que foi anotado sobre sua finalidade?",
+    "alternativas": [
+      "Analisar uma característica da forma da distribuição associada à concentração dos dados.",
+      "Determinar diretamente o maior valor de um Box Plot.",
+      "Identificar qual categoria possui maior frequência em um gráfico de pizza.",
+      "Substituir o teste de Shapiro-Wilk na decisão sobre normalidade."
+    ],
+    "resposta": 0
+  },
+  {
+    "pergunta": "Por que a eliminação ou tratamento de outliers pode ser importante em uma análise de dados?",
+    "alternativas": [
+      "Porque valores extremos podem influenciar os resultados da análise, positiva ou negativamente.",
+      "Porque todo outlier é necessariamente um erro e deve sempre ser apagado.",
+      "Porque retirar outliers garante que qualquer conjunto passe a ser normal.",
+      "Porque outliers não têm relação com medidas estatísticas ou resultados."
+    ],
+    "resposta": 0
+  },
+  {
+    "pergunta": "No Box Plot, qual é a medida que o professor destacou como principal para a análise do grupo?",
+    "alternativas": [
+      "A mediana, indicada pela linha dentro da caixa.",
+      "O maior valor extremo, independentemente de onde esteja a mediana.",
+      "A largura da caixa, que por si só determina a posição central.",
+      "O número de outliers, que substitui a mediana na comparação entre grupos."
+    ],
+    "resposta": 0
+  },
+  {
+    "pergunta": "Na comparação dos grupos B1, B2 e B3 apresentada pelo professor, qual grupo possui a maior mediana?",
+    "alternativas": [
+      "B1",
+      "B2",
+      "B3",
+      "Não é possível identificar a mediana em um Box Plot."
+    ],
+    "resposta": 1
+  },
+  {
+    "pergunta": "Ao comparar B1, B2 e B3 dois a dois, sem repetir a mesma comparação em ordem inversa, qual alternativa combina corretamente o número de comparações e as diferenças visualmente destacadas pelo professor?",
+    "alternativas": [
+      "2 comparações: B1×B2 e B2×B3; ambas são as únicas visualmente relevantes.",
+      "3 comparações: B1×B2, B1×B3 e B2×B3; visualmente, B1×B2 e B1×B3 foram destacadas como diferentes.",
+      "4 comparações: B1×B2, B2×B1, B1×B3 e B3×B1; todas são visualmente significativas.",
+      "6 comparações: cada par deve ser contado nas duas ordens; apenas B2×B3 é visualmente diferente."
+    ],
+    "resposta": 1
+  },
+  {
+    "pergunta": "Na questão sobre a formação de um especialista em Ciência de Dados, o que o professor disse que deveria aparecer na resposta?",
+    "alternativas": [
+      "Os conteúdos e conhecimentos de análise trabalhados na disciplina, mostrando o que foi aprendido e sua importância para a área.",
+      "Somente o nome das ferramentas utilizadas, sem explicar os conteúdos estudados.",
+      "Apenas uma lista de linguagens de programação, independentemente do que foi visto na disciplina.",
+      "Somente conhecimentos estudados fora da disciplina, porque os conteúdos da aula são insuficientes."
+    ],
+    "resposta": 0
+  }
+];
+
+let current = 0;
+let score = 0;
+let answered = false;
+
+const explanations = [
+  [
+    "0,04 é menor que 0,05. Na explicação do professor, isso leva à rejeição da hipótese nula de normalidade e à interpretação de que os dados não são normalmente distribuídos.",
+    "Estar próximo de 0,05 não transforma 0,04 em um valor acima do limite. O professor orientou comparar diretamente o p-valor com 0,05.",
+    "O teste é interpretável com p = 0,04. O valor 0,05 funciona como referência para a decisão, não como exigência de que o p-valor seja exatamente igual a ele.",
+    "A regra explicada pelo professor é o contrário: abaixo de 0,05 rejeita-se a hipótese nula de normalidade; não se usa esse resultado para confirmá-la."
+  ],
+  [
+    "93% seria o complemento de 0,07, não de 0,03. Para 0,03, a diferença até 1 é 0,97.",
+    "95% corresponde ao exemplo de p = 0,05 citado pelo professor. Para p = 0,03, o nível indicado por ele é diferente.",
+    "0,03 corresponde a 3%; seu complemento é 97%. O professor deu exatamente esse exemplo para mostrar que a lógica deve ser compreendida.",
+    "99% corresponde ao exemplo de p = 0,01. Para p = 0,03, o complemento é 97%."
+  ],
+  [
+    "Uma tendência em que X cresce e Y também cresce é positiva. No cenário da questão, as duas variáveis caminham em sentidos opostos.",
+    "X aumenta enquanto Y diminui. Essa variação em sentidos opostos é justamente a justificativa que o professor pediu para a correlação negativa.",
+    "O fato de Y diminuir não elimina a possibilidade de correlação; ele caracteriza uma tendência inversa. Correlação nula seria ausência de uma relação linear identificável.",
+    "A direção é negativa, não positiva. Além disso, o enunciado não fornece elementos suficientes para classificar a força como forte."
+  ],
+  [
+    "Com a mesma direção positiva, maior dispersão dos pontos em relação à tendência indica uma relação menos consistente. Por isso, B tende a ser mais fraca que A.",
+    "Dispersão maior não significa associação mais forte. Uma relação linear mais forte tende a manter os pontos mais próximos da tendência.",
+    "O sinal positivo informa a direção da relação, mas não determina sozinho a força. A e B podem ter forças diferentes mesmo sendo positivas.",
+    "A apresenta uma tendência crescente, então pode ter correlação positiva. A proximidade dos pontos à tendência é que ajuda a avaliar a força."
+  ],
+  [
+    "Essa é a relação central registrada pelo professor: KPI é uma métrica escolhida por sua importância, mas continua sendo uma métrica.",
+    "A relação está invertida. Se toda métrica fosse KPI, não faria sentido a frase destacada pelo professor de que nem toda métrica é KPI.",
+    "KPI e métrica não são categorias mutuamente exclusivas. O professor enfatizou justamente que uma KPI continua sendo uma métrica.",
+    "O maior valor numérico não define uma KPI. A distinção está relacionada à relevância do indicador para os objetivos acompanhados."
+  ],
+  [
+    "O professor relacionou o posicionamento das informações críticas ao padrão natural de leitura: a região superior esquerda recebe atenção primeiro no padrão ocidental mencionado.",
+    "O canto inferior direito não é o ponto inicial do padrão de leitura citado na aula.",
+    "A posição não deve ser aleatória quando existe uma hierarquia de importância. O objetivo do posicionamento é facilitar a leitura das informações prioritárias.",
+    "Colocar tudo no centro não resolve a hierarquia visual. A orientação anotada foi priorizar os elementos importantes na região superior esquerda."
+  ],
+  [
+    "Quando muitas categorias são colocadas em fatias, comparar visualmente tamanhos próximos pode ficar difícil. Essa é a justificativa registrada nas anotações.",
+    "Gráficos de pizza podem representar dados qualitativos quando as categorias são apresentadas como partes de um todo. O problema anotado é a dificuldade de visualização com muitas partes.",
+    "A própria ideia do gráfico de pizza é representar proporções de um todo. Portanto, ele pode representar proporções; a dificuldade aumenta quando há muitas fatias.",
+    "O problema não é uma impossibilidade absoluta de identificar categorias. A questão é que muitas fatias tornam a comparação visual menos clara."
+  ],
+  [
+    "A justificativa combina os elementos trabalhados: uma distribuição normal é aproximadamente simétrica, concentra mais valores na região central e apresenta caudas que diminuem em direção às extremidades.",
+    "Assimetria é incompatível com a característica de simetria usada na justificativa da curva normal apresentada em aula.",
+    "Uma distribuição normal não espalha os valores uniformemente. Há maior concentração ao redor do centro e menor frequência nas extremidades.",
+    "Uma normal não precisa de vários picos. O formato característico é aproximadamente em sino, com um pico central."
+  ],
+  [
+    "Essa alternativa preserva o que aparece nas anotações: as curvas foram tratadas como normais, enquanto a comparação destacava diferenças na forma e na concentração dos dados.",
+    "A anotação não registra que todas as curvas são assimétricas; ao contrário, elas foram relacionadas à normalidade.",
+    "Dois picos não são uma característica apresentada como semelhança entre as curvas. A anotação aponta que elas foram consideradas normais.",
+    "Não há indicação de que todas as curvas possuam exatamente os mesmos valores. A comparação registrada diz respeito à forma e à concentração."
+  ],
+  [
+    "Essa alternativa mantém o sentido das anotações: a curtose foi associada à descrição da forma e da concentração da distribuição, sem transformá-la em um teste de normalidade ou em uma medida de Box Plot.",
+    "O maior valor de um Box Plot é uma questão diferente da métrica de curtose.",
+    "Frequência de categorias em gráfico de pizza não é a finalidade registrada para curtose.",
+    "O teste de Shapiro-Wilk é o procedimento citado pelo professor para a questão de normalidade. A curtose não foi apresentada como substituta desse teste."
+  ],
+  [
+    "Um outlier é um valor extremo que pode alterar medidas e influenciar a interpretação. As anotações destacam justamente que ele pode afetar o resultado positiva ou negativamente.",
+    "Um outlier pode ser um valor válido e não é automaticamente um erro. Por isso, não se deve afirmar que todo outlier precisa ser apagado.",
+    "Retirar outliers não garante, por si só, uma distribuição normal. O tratamento depende do contexto e da análise realizada.",
+    "Os outliers podem influenciar resultados e medidas estatísticas; portanto, não é correto dizer que não têm relação com a análise."
+  ],
+  [
+    "O professor destacou a mediana como a medida principal na análise do Box Plot. Ela é indicada pela linha dentro da caixa.",
+    "O maior valor extremo pode ser relevante para identificar um score máximo, mas não substitui a mediana como medida central do Box Plot.",
+    "A largura da caixa mostra uma característica de dispersão entre quartis; ela não determina sozinha a posição da mediana.",
+    "Outliers são informações adicionais do Box Plot. Eles não substituem a mediana na comparação central entre grupos."
+  ],
+  [
+    "Na comparação citada pelo professor, B2 apresenta a maior mediana. Ele diferencia isso de simplesmente olhar o maior valor extremo.",
+    "B1 não foi apontado pelo professor como o grupo de maior mediana; a resposta indicada foi B2.",
+    "B3 pode apresentar um valor extremo alto, mas isso não significa que sua mediana seja a maior. O professor indicou B2.",
+    "A mediana é justamente uma das medidas que pode ser identificada em um Box Plot, por meio da linha dentro da caixa."
+  ],
+  [
+    "Com três grupos existem três pares únicos: B1×B2, B1×B3 e B2×B3. O professor também destacou visualmente B1×B2 e B1×B3, deixando claro que essa observação visual não equivale automaticamente a significância estatística.",
+    "A comparação B1×B3 também faz parte dos três pares. Portanto, a lista com apenas duas comparações está incompleta.",
+    "Contar B1×B2 e B2×B1 separadamente repete a mesma comparação. Além disso, o professor não disse que todas as comparações eram visualmente significativas.",
+    "Com três grupos, contar cada par nas duas ordens gera duplicação. As três comparações únicas são as citadas na alternativa B."
+  ],
+  [
+    "O professor explicou que essa questão pede os conhecimentos e conteúdos trabalhados na disciplina que são importantes para a formação na área de Ciência de Dados, incluindo a capacidade de análise.",
+    "Ele não restringiu a resposta ao nome das ferramentas. Disse que queria os conteúdos e conhecimentos trabalhados na disciplina.",
+    "A questão não pede uma lista de linguagens de programação. O foco é o que foi aprendido na disciplina de Ciência de Dados.",
+    "O professor disse que queria justamente os conteúdos vistos na disciplina; conhecimentos externos poderiam até aparecer, mas não eram o foco da pergunta."
+  ]
+];
+
+ ["Pense nas responsabilidades do profissional de TI diante das pessoas, da sociedade e do próprio trabalho.", "Identifique o conceito central da questão e compare cada alternativa com ele.", "Lembre que o conceito envolve todos os aspectos da produção de software, não apenas programação.", "Recorde as quatro atividades de alto nível apresentadas no material.", "Identifique o conceito central da questão e compare cada alternativa com ele.", "Pense na definição do que o sistema deve fazer e nas necessidades que orientam seu desenvolvimento.", "Associe cada princípio do código à área de responsabilidade correspondente.", "Pense nos atributos usados para avaliar a qualidade de um software.", "Identifique o conceito central da questão e compare cada alternativa com ele.", "Identifique qual responsabilidade profissional está diretamente ligada ao conceito citado.", "Identifique o conceito central da questão e compare cada alternativa com ele.", "Identifique o conceito central da questão e compare cada alternativa com ele.", "Associe cada princípio do código à área de responsabilidade correspondente.", "Associe cada princípio do código à área de responsabilidade correspondente.", "Associe cada princípio do código à área de responsabilidade correspondente.", "Associe cada princípio do código à área de responsabilidade correspondente.", "Associe cada princípio do código à área de responsabilidade correspondente.", "Associe cada princípio do código à área de responsabilidade correspondente.", "Associe cada princípio do código à área de responsabilidade correspondente.", "Associe cada princípio do código à área de responsabilidade correspondente.", "Associe cada princípio do código à área de responsabilidade correspondente.", "Considere as consequências da decisão profissional para a segurança e o bem-estar das pessoas.", "Considere as consequências da decisão profissional para a segurança e o bem-estar das pessoas.", "Identifique o conceito central da questão e compare cada alternativa com ele.", "Lembre que o conceito envolve todos os aspectos da produção de software, não apenas programação.", "Identifique o conceito central da questão e compare cada alternativa com ele.", "Associe cada princípio do código à área de responsabilidade correspondente.", "Identifique o conceito central da questão e compare cada alternativa com ele.", "Identifique o conceito central da questão e compare cada alternativa com ele.", "Identifique o conceito central da questão e compare cada alternativa com ele.", "Organize mentalmente a linha do tempo apresentada na aula.", "Organize mentalmente a linha do tempo apresentada na aula.", "Identifique o conceito central da questão e compare cada alternativa com ele.", "Organize mentalmente a linha do tempo apresentada na aula.", "Observe a combinação entre entusiasmo pelas possibilidades e preocupação com riscos.", "Compare a imagem criada pela mídia com a descrição da prática profissional real.", "Compare a imagem criada pela mídia com a descrição da prática profissional real.", "Identifique o conceito central da questão e compare cada alternativa com ele.", "Identifique o conceito central da questão e compare cada alternativa com ele.", "Lembre da participação histórica das mulheres e do papel da representação.", "Lembre da participação histórica das mulheres e do papel da representação.", "Compare a imagem criada pela mídia com a descrição da prática profissional real.", "Pense nos efeitos da substituição de tarefas e na adaptação dos trabalhadores.", "Pense nos efeitos da substituição de tarefas e na adaptação dos trabalhadores.", "Relacione a sociedade informática aos impactos sociais e psicológicos da tecnologia.", "Pense nos efeitos da substituição de tarefas e na adaptação dos trabalhadores.", "Observe a combinação entre entusiasmo pelas possibilidades e preocupação com riscos.", "Observe a combinação entre entusiasmo pelas possibilidades e preocupação com riscos.", "Lembre da passagem da centralidade dos átomos para os bits.", "Pense na relação cada vez mais direta e cotidiana entre cidadão e tecnologia digital.", "Associe tecnologia à colaboração e à inteligência coletiva.", "Pense nos efeitos da substituição de tarefas e na adaptação dos trabalhadores.", "Associe tecnologia à colaboração e à inteligência coletiva.", "Pense em como representações repetidas podem influenciar o imaginário coletivo.", "Pense em como representações repetidas podem influenciar o imaginário coletivo.", "Identifique o conceito central da questão e compare cada alternativa com ele.", "Identifique o conceito central da questão e compare cada alternativa com ele.", "Pense nos efeitos da substituição de tarefas e na adaptação dos trabalhadores.", "Identifique o conceito central da questão e compare cada alternativa com ele.", "Identifique o conceito central da questão e compare cada alternativa com ele."];
+
+function loadQuestion() {
+  const q = quiz[current];
+
+  document.getElementById("progress").innerText =
+    `Questão ${current + 1} de ${quiz.length}`;
+
+  document.getElementById("question").innerText = q.pergunta;
+
+  const optionsDiv = document.getElementById("options");
+  optionsDiv.innerHTML = "";
+
+  const nextButton = document.getElementById("nextButton");
+  nextButton.disabled = true;
+  nextButton.innerText =
+    current === quiz.length - 1 ? "Ver resultado" : "Próxima questão";
+
+  q.alternativas.forEach((alt, index) => {
+    const wrap = document.createElement("div");
+    wrap.classList.add("option-wrap");
+
+    const btn = document.createElement("div");
+    btn.classList.add("option");
+    btn.innerText = alt;
+    btn.onclick = () => selectOption(index, btn);
+
+    wrap.appendChild(btn);
+    optionsDiv.appendChild(wrap);
+  });
+
+  answered = false;
+}
+
+function selectOption(index, element) {
+  if (answered) return;
+
+  const q = quiz[current];
+  const correctIndex = q.resposta;
+  const options = document.querySelectorAll(".option");
+  const wrappers = document.querySelectorAll(".option-wrap");
+
+  answered = true;
+
+  if (index === correctIndex) {
+    element.classList.add("correct");
+    score++;
+  } else {
+    element.classList.add("wrong");
+    options[correctIndex].classList.add("correct");
+  }
+
+  element.classList.add("selected");
+
+  // Exibe a explicação individual de cada uma das quatro alternativas.
+  wrappers.forEach((itemWrap, i) => {
+    if (i !== index && i !== correctIndex) return;
+
+    const feedback = document.createElement("div");
+    feedback.classList.add("feedback");
+
+    const title = document.createElement("span");
+    title.classList.add("feedback-title");
+
+    if (i === index && index === correctIndex) {
+      title.innerText = "✓ Por que sua resposta está correta?";
+    } else if (i === index) {
+      title.innerText = "✗ Por que sua resposta está errada?";
+    } else {
+      title.innerText = "✓ Por que esta é a resposta correta?";
+    }
+
+    const text = document.createElement("span");
+    text.innerText = explanations[current][i];
+
+    feedback.appendChild(title);
+    feedback.appendChild(text);
+    itemWrap.appendChild(feedback);
+  });
+
+  document.getElementById("nextButton").disabled = false;
+}
+
+function nextQuestion() {
+  if (!answered) {
+    alert("Responda antes de continuar!");
+    return;
+  }
+
+  current++;
+
+  if (current < quiz.length) {
+    loadQuestion();
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  const percentage = Math.round((score / quiz.length) * 100);
+
+  let message = "Continue revisando os conteúdos dos PDFs.";
+  if (percentage >= 90) {
+    message = "Excelente! Você está muito bem preparado.";
+  } else if (percentage >= 70) {
+    message = "Muito bom! Vale revisar os assuntos em que você teve dúvida.";
+  } else if (percentage >= 50) {
+    message = "Bom começo! Faça outra rodada e revise os conceitos que errou.";
+  }
+
+  document.querySelector(".quiz-container").innerHTML = `
+    <div class="result">
+      <h2>Resultado</h2>
+      <p>Você acertou ${score} de ${quiz.length} questões!</p>
+      <p class="score-mini">${percentage}% de aproveitamento</p>
+      <p>${message}</p>
+      <button onclick="location.reload()">Refazer quiz</button>
+    </div>
+  `;
+}
+
+loadQuestion();
+</script>
+
+</body>
+</html>
